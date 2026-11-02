@@ -1,0 +1,47 @@
+name: Publish Müzik Studio AI PRO Privacy Policy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - .github/workflows/pages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify public website contains only the privacy policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f index.html
+          grep -q 'unlu5374@gmail.com' index.html
+          grep -q 'Privacy Policy' index.html
+          mkdir -p site
+          cp index.html site/index.html
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Upload only the website
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - name: Publish policy
+        uses: actions/deploy-pages@v4
+        id: deployment
